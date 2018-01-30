@@ -104,6 +104,13 @@ resources:
         external_id: { get_param: master_floating_ip }
         properties:
             floating_network: { get_param: public_network_id }
+    master_config:
+        type: OS::Heat::CloudConfig
+        properties:
+            cloud_config:
+                write_files:
+                    - path: /root/calico.yaml
+                      content: { get_file: calico.yaml }
     master:
         type: node.yaml
         properties:
@@ -112,6 +119,7 @@ resources:
             image: { get_param: image }
             flavor: { get_param: master_flavor }
             floating_ips: [{ get_param: master_floating_ip }]
+            additional_config: { get_resource: master_config }
             name:
                 str_replace:
                     template: $prefix$random-master

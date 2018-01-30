@@ -33,6 +33,16 @@ parameters:
         type: string
         label: Install Script
         description: Script to run after cloud-init finishes
+    additional_config:
+        type: string
+        label: Additional Config
+        description: Additional software config
+        default: ""
+conditions:
+    empty_additional_config:
+        equals:
+            - { get_param: additional_config }
+            - ""
 resources:
     port:
         type: OS::Neutron::Port
@@ -57,7 +67,7 @@ resources:
             name: { get_param: name }
             user_data_format: SOFTWARE_CONFIG
             user_data: { get_resource: user_data }
-    user_data:
+    user_data_base:
         type: OS::Heat::CloudConfig
         properties:
             cloud_config:
@@ -84,6 +94,15 @@ resources:
                       - 'bash'
                       - '-c'
                       - { get_param: install_script }
+    user_data:
+        type: OS::Heat::MultipartMime
+        properties:
+            parts:
+                if: 
+                    - empty_additional_config
+                    - - config: { get_resource: user_data_base }
+                    - - config: { get_resource: user_data_base }
+                      - config: { get_param: additional_config }
 outputs:
     ip_address:
         description: IP address of the node
