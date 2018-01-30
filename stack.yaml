@@ -120,6 +120,7 @@ resources:
                       content: { get_file: tiller.yaml }
     master:
         type: node.yaml
+        depends_on: internal_subnet
         properties:
             index: 0
             key_name: { get_param: key_name }
@@ -145,6 +146,7 @@ resources:
     ##### Slaves #####
     slaves:
         type: OS::Heat::ResourceGroup
+        depends_on: internal_subnet
         properties:
             count: { get_param: slave_count }
             resource_def:
