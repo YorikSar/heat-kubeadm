@@ -21,6 +21,10 @@ parameters:
         type: comma_delimited_list
         label: Floating IP IDs
         description: Floating IP for node
+    availability_zone:
+        type: string
+        label: Availability Zone
+        description: Availabilito zone to create nodes in
     name:
         type: string
         label: Instance Name
@@ -60,6 +64,7 @@ resources:
     instance:
         type: OS::Nova::Server
         properties:
+            availability_zone: { get_param: availability_zone }
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }

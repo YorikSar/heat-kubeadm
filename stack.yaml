@@ -50,6 +50,11 @@ parameters:
         label: DNS Nameservers
         description: DNS nameservers to use on nodes
         default: 8.8.8.8
+    availability_zone:
+        type: string
+        label: Availability Zone
+        description: Availabilito zone to create nodes in
+        default: mcp-platform
 
 resources:
     random_string:
@@ -122,6 +127,7 @@ resources:
             flavor: { get_param: master_flavor }
             floating_ips: [{ get_param: master_floating_ip }]
             additional_config: { get_resource: master_config }
+            availability_zone: { get_param: availability_zone }
             name:
                 str_replace:
                     template: $prefix$random-master
@@ -149,6 +155,7 @@ resources:
                     image: { get_param: image }
                     flavor: { get_param: slave_flavor }
                     floating_ips: { get_param: slave_floating_ips }
+                    availability_zone: { get_param: availability_zone }
                     name:
                         str_replace:
                             template: $prefix$random-slave-%index%
