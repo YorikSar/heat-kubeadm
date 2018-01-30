@@ -1,10 +1,10 @@
 heat_template_version: 2017-02-24
-description: Kubernetes slave definition
+description: Kubernetes node definition
 parameters:
     index:
         type: number
         label: Index
-        description: Slave index
+        description: Index in floating IP list
     key_name:
         type: string
         label: Key Name
@@ -15,20 +15,20 @@ parameters:
         description: Image to be used
     flavor:
         type: string
-        label: Slave Instance Type
-        description: Type of instance (flavor) to deploy slave nodes
+        label: Instance Type
+        description: Type of instance (flavor) to deploy node
     floating_ips:
         type: comma_delimited_list
-        label: Slave Floating IP IDs
-        description: Floating IP for slave nodes
+        label: Floating IP IDs
+        description: Floating IP for node
     name:
         type: string
-        label: Slave Instance Name
-        description: Name of slave instance
+        label: Instance Name
+        description: Name of the node
     internal_net:
         type: string
         label: Internal Network
-        description: Network to connect slave to
+        description: Network to connect node to
     install_script:
         type: string
         label: Install Script
@@ -46,7 +46,7 @@ resources:
         properties:
             floatingip_id: { get_param: [ floating_ips, { get_param: index } ] }
             port_id: { get_resource: port }
-    instances:
+    instance:
         type: OS::Nova::Server
         properties:
             image: { get_param: image }
@@ -84,3 +84,7 @@ resources:
                       - 'bash'
                       - '-c'
                       - { get_param: install_script }
+outputs:
+    ip_address:
+        description: IP address of the node
+        value: { get_attr: [instance, first_address] }

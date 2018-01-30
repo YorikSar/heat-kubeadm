@@ -99,70 +99,32 @@ resources:
             router_id: { get_resource: internal_router }
             subnet_id: { get_resource: internal_subnet }
     ##### Master #####
-    master_port:
-        type: OS::Neutron::Port
-        properties:
-            admin_state_up: true
-            network_id: { get_resource: internal_net }
-            allowed_address_pairs:
-                - ip_address: 10.0.0.0/8
     master_floatingip:
         type: OS::Neutron::FloatingIP
         external_id: { get_param: master_floating_ip }
         properties:
             floating_network: { get_param: public_network_id }
-    master_floatingip_association:
-        type: OS::Neutron::FloatingIPAssociation
+    master:
+        type: node.yaml
         properties:
-            floatingip_id: { get_param: master_floating_ip }
-            port_id: { get_resource: master_port }
-    master_instance:
-        type: OS::Nova::Server
-        properties:
+            index: 0
+            key_name: { get_param: key_name }
             image: { get_param: image }
             flavor: { get_param: master_flavor }
-            key_name: { get_param: key_name }
-            networks:
-                - port: { get_resource: master_port }
+            floating_ips: [{ get_param: master_floating_ip }]
             name:
                 str_replace:
                     template: $prefix$random-master
                     params:
                         $prefix: { get_param: resource_prefix }
                         $random: { get_resource: random_string }
-            user_data_format: SOFTWARE_CONFIG
-            user_data: { get_resource: master_user_data }
-    master_user_data:
-        type: OS::Heat::CloudConfig
-        properties:
-            cloud_config:
-                #cloud-config
-                manage_etc_hosts: localhost
-                #package_upgrade: true
-                packages:
-                    - kubeadm=1.8.7-00
-                    - kubernetes-cni=0.5.1-00
-                    - kubelet=1.8.7-00
-                    - kubectl=1.8.7-00
-                    #- docker-ce=17.03.2~ce-0~ubuntu-xenial
-                apt_sources:
-                    docker.list:
-                        source: "deb https://download.docker.com/linux/ubuntu xenial stable"
-                        key: { get_file: docker.pgp }
-                    kubernetes.list:
-                        source: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
-                        key: { get_file: kubernetes.pgp }
-                runcmd:
-                    - - 'systemd-run'
-                      - '--on-boot=0s'
-                      - '--unit=kubeadm-install'
-                      - 'bash'
-                      - '-c'
-                      - str_replace:
-                            params:
-                                $floatingip: { get_attr: [master_floatingip, floating_ip_address] }
-                                $token: { get_attr: [token, value] }
-                            template: { get_file: master.sh }
+            internal_net: { get_resource: internal_net }
+            install_script:
+                str_replace:
+                    params:
+                        $floatingip: { get_attr: [master_floatingip, floating_ip_address] }
+                        $token: { get_attr: [token, value] }
+                    template: { get_file: master.sh }
 
     ##### Slaves #####
     slaves:
@@ -170,7 +132,7 @@ resources:
         properties:
             count: { get_param: slave_count }
             resource_def:
-                type: slave.yaml
+                type: node.yaml
                 properties:
                     index: "%index%"
                     key_name: { get_param: key_name }
@@ -188,7 +150,7 @@ resources:
                         str_replace:
                             params:
                                 $token: { get_attr: [token, value] }
-                                $master_ip: { get_attr: [ master_port, fixed_ips, 0, ip_address ] }
+                                $master_ip: { get_attr: [ master, ip_address ] }
                             template: { get_file: slave.sh }
     ##### Token for kubeadm ####
     token_part_1:
