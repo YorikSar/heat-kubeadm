@@ -50,7 +50,8 @@ resources:
             admin_state_up: true
             network_id: { get_param: internal_net }
             allowed_address_pairs:
-                - ip_address: 10.0.0.0/8
+                - ip_address: 10.96.0.0/8
+                - ip_address: 192.168.0.0/16
     floatingip_association:
         type: OS::Neutron::FloatingIPAssociation
         properties:
