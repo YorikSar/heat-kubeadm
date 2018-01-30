@@ -13,15 +13,15 @@ parameters:
         type: string
         label: Image
         description: Image to be used
-    slave_flavor:
+    flavor:
         type: string
         label: Slave Instance Type
         description: Type of instance (flavor) to deploy slave nodes
-    slave_floating_ips:
+    floating_ips:
         type: comma_delimited_list
         label: Slave Floating IP IDs
         description: Floating IP for slave nodes
-    slave_name:
+    name:
         type: string
         label: Slave Instance Name
         description: Name of slave instance
@@ -29,39 +29,35 @@ parameters:
         type: string
         label: Internal Network
         description: Network to connect slave to
-    master_ip:
+    install_script:
         type: string
-        label: Master IP
-        description: Master node IP address
-    token:
-        type: string
-        label: Token
-        description: kubeadm token
+        label: Install Script
+        description: Script to run after cloud-init finishes
 resources:
-    slave_port:
+    port:
         type: OS::Neutron::Port
         properties:
             admin_state_up: true
             network_id: { get_param: internal_net }
             allowed_address_pairs:
                 - ip_address: 10.0.0.0/8
-    slave_floatingip_association:
+    floatingip_association:
         type: OS::Neutron::FloatingIPAssociation
         properties:
-            floatingip_id: { get_param: [ slave_floating_ips, { get_param: index } ] }
-            port_id: { get_resource: slave_port }
-    slave_instances:
+            floatingip_id: { get_param: [ floating_ips, { get_param: index } ] }
+            port_id: { get_resource: port }
+    instances:
         type: OS::Nova::Server
         properties:
             image: { get_param: image }
-            flavor: { get_param: slave_flavor }
+            flavor: { get_param: flavor }
             key_name: { get_param: key_name }
             networks:
-                - port: { get_resource: slave_port }
-            name: { get_param: slave_name }
+                - port: { get_resource: port }
+            name: { get_param: name }
             user_data_format: SOFTWARE_CONFIG
-            user_data: { get_resource: slave_user_data }
-    slave_user_data:
+            user_data: { get_resource: user_data }
+    user_data:
         type: OS::Heat::CloudConfig
         properties:
             cloud_config:
@@ -87,8 +83,4 @@ resources:
                       - '--unit=kubeadm-install'
                       - 'bash'
                       - '-c'
-                      - str_replace:
-                            params:
-                                $token: { get_param: token }
-                                $master_ip: { get_param: master_ip }
-                            template: { get_file: slave.sh }
+                      - { get_param: install_script }

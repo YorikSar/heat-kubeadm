@@ -175,17 +175,21 @@ resources:
                     index: "%index%"
                     key_name: { get_param: key_name }
                     image: { get_param: image }
-                    slave_flavor: { get_param: slave_flavor }
-                    slave_floating_ips: { get_param: slave_floating_ips }
-                    slave_name:
+                    flavor: { get_param: slave_flavor }
+                    floating_ips: { get_param: slave_floating_ips }
+                    name:
                         str_replace:
                             template: $prefix$random-slave-%index%
                             params:
                                 $prefix: { get_param: resource_prefix }
                                 $random: { get_resource: random_string }
                     internal_net: { get_resource: internal_net }
-                    master_ip: { get_attr: [ master_port, fixed_ips, 0, ip_address ] }
-                    token: { get_attr: [token, value] }
+                    install_script:
+                        str_replace:
+                            params:
+                                $token: { get_attr: [token, value] }
+                                $master_ip: { get_attr: [ master_port, fixed_ips, 0, ip_address ] }
+                            template: { get_file: slave.sh }
     ##### Token for kubeadm ####
     token_part_1:
         type: OS::Heat::RandomString
