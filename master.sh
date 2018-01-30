@@ -8,4 +8,5 @@ export KUBECONFIG=/etc/kubernetes/admin.conf
 until kubectl get nodes; do
   sleep 2
 done
-kubectl apply -f calico.yaml
+kubectl apply -f /root/calico.yaml
+kubectl apply -f /root/tiller.yaml

@@ -111,6 +111,8 @@ resources:
                 write_files:
                     - path: /root/calico.yaml
                       content: { get_file: calico.yaml }
+                    - path: /root/tiller.yaml
+                      content: { get_file: tiller.yaml }
     master:
         type: node.yaml
         properties:
