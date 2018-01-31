@@ -9,9 +9,23 @@ EOF
 systemctl daemon-reload
 # Install docker
 apt-get install -y docker-ce=17.03.2~ce-0~ubuntu-xenial
+# Configure kubelet to use pause image from Docker Hub
+cat > /etc/systemd/system/kubelet.service.d/20-pod-infra-image.conf <<EOF
+[Service]
+Environment="KUBELET_EXTRA_ARGS=--pod-infra-container-image=mirantisworkloads/pause-amd64:3.0"
+EOF
+systemctl daemon-reload
+systemctl restart kubelet
 # Run kubeadm
+cat << EOF > /root/kubeadm.yaml
+apiServerCertSANs:
+- $floatingip
+imageRepository: mirantisworkloads
+token: $token
+unifiedControlPlaneImage: mirantisworkloads/hyperkube-amd64:v1.8.7
+EOF
 modprobe br_netfilter
-kubeadm init --apiserver-cert-extra-sans $floatingip --token $token
+kubeadm init --config /root/kubeadm.yaml
 # Copy kubeconfig to ubuntu user
 mkdir -p ~ubuntu/.kube
 cp /etc/kubernetes/admin.conf ~ubuntu/.kube/config
