@@ -51,7 +51,17 @@ parameters:
         type: string
         label: Availability Zone
         description: Availabilito zone to create nodes in
+    proxy:
+        type: string
+        label: Proxy
+        description: Proxy server to use, in format http://1.2.3.4:567
+        default: ""
 
+conditions:
+    empty_proxy:
+        equals:
+            - { get_param: proxy }
+            - ""
 resources:
     random_string:
         type: OS::Heat::RandomString
@@ -99,13 +109,21 @@ resources:
         properties:
             router_id: { get_resource: internal_router }
             subnet_id: { get_resource: internal_subnet }
+    proxy_config:
+        type: OS::Heat::CloudConfig
+        properties:
+            cloud_config:
+                if:
+                    - empty_proxy
+                    - {}
+                    - apt_proxy: { get_attr: proxy }
     ##### Master #####
     master_floatingip:
         type: OS::Neutron::FloatingIP
         external_id: { get_param: master_floating_ip }
         properties:
             floating_network: { get_param: public_network_id }
-    master_config:
+    master_config_files:
         type: OS::Heat::CloudConfig
         properties:
             cloud_config:
@@ -114,6 +132,12 @@ resources:
                       content: { get_file: calico.yaml }
                     - path: /root/tiller.yaml
                       content: { get_file: tiller.yaml }
+    master_config:
+        type: OS::Heat::MultipartMime
+        properties:
+            parts:
+                - { get_resource: proxy_config }
+                - { get_resource: master_config_files }
     master:
         type: node.yaml
         depends_on: internal_subnet
@@ -137,6 +161,7 @@ resources:
                     params:
                         $floatingip: { get_attr: [master_floatingip, floating_ip_address] }
                         $token: { get_attr: [token, value] }
+                        $proxy: { get_param: proxy }
                     template: { get_file: master.sh }
 
     ##### Slaves #####
@@ -153,6 +178,7 @@ resources:
                     image: { get_param: image }
                     flavor: { get_param: slave_flavor }
                     floating_ips: { get_param: slave_floating_ips }
+                    additional_config: { get_resource: proxy_config }
                     availability_zone: { get_param: availability_zone }
                     name:
                         str_replace:
@@ -166,6 +192,7 @@ resources:
                             params:
                                 $token: { get_attr: [token, value] }
                                 $master_ip: { get_attr: [ master, ip_address ] }
+                                $proxy: { get_param: proxy }
                             template: { get_file: slave.sh }
     ##### Token for kubeadm ####
     token_part_1:

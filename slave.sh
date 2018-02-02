@@ -6,6 +6,12 @@ cat << EOF > /etc/systemd/system/docker.service.d/noiptables.conf
 ExecStart=
 ExecStart=/usr/bin/docker daemon -H fd:// --iptables=false
 EOF
+if [ "$proxy" ]; then
+  cat << EOF > /etc/systemd/system/docker.service.d/proxy.conf
+[Service]
+Environment="HTTP_PROXY=$proxy"
+EOF
+fi
 systemctl daemon-reload
 # Install docker
 apt-get install -y docker-ce=17.03.2~ce-0~ubuntu-xenial
