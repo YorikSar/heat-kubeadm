@@ -1,0 +1,107 @@
+heat_template_version: 2017-02-24
+description: simple http proxy
+parameters:
+    key_name:
+        type: string
+        label: Key Name
+        description: SSH key to be used for all instances
+    image:
+        type: string
+        label: Image
+        description: Image to be used
+        default: ubuntu-16-04-amd64-cloudimg    
+    flavor:
+        type: string
+        label: Master Instance Type
+        description: Type of instance (flavor) to deploy master node
+        default: m1.small
+    public_network_id:
+        type: string
+        description: ID of the public network
+        default: public
+    internal_net:
+        type: string
+        description: ID of the public network
+        default: public
+    resource_prefix:
+        type: string
+        description: Prefix to add to all resources
+        default: proxy-
+    availability_zone:
+        type: string
+        label: Availability Zone
+        description: Availabilito zone to create nodes in
+outputs:
+    ip_address:
+        description: IP address of the proxy
+        value: { get_attr: [instance, first_address] }
+resources:
+    port:
+        type: OS::Neutron::Port
+        properties:
+            admin_state_up: true
+            network_id: { get_param: internal_net }
+    proxy_floatingip:
+        type: OS::Neutron::FloatingIP
+        properties:
+            floating_network: { get_param: public_network_id }
+    floatingip_association:
+        type: OS::Neutron::FloatingIPAssociation
+        properties:
+            floatingip_id: { get_resource: proxy_floatingip }
+            port_id: { get_resource: port }
+    ##### Master #####
+    instance:
+        type: OS::Nova::Server
+        properties:
+            availability_zone: { get_param: availability_zone }
+            image: { get_param: image }
+            flavor: { get_param: flavor }
+            key_name: { get_param: key_name }
+            networks:
+                - port: { get_resource: port }
+            name:
+                str_replace:
+                    template: $prefix-proxy
+                    params:
+                        $prefix: { get_param: resource_prefix }
+            user_data_format: SOFTWARE_CONFIG
+            user_data: { get_resource: proxy_config }
+    proxy_config:
+        type: OS::Heat::CloudConfig
+        properties:
+            cloud_config:
+                manage_etc_hosts: localhost
+                packages:
+                - squid
+                write_files:
+                - path: /etc/squid/squid.conf
+                  content: |
+                      acl localnet src 10.2.2.0/24
+                      acl SSL_ports port 443
+                      #acl Safe_ports port 80          # http
+                      #acl Safe_ports port 21          # ftp
+                      #acl Safe_ports port 443         # https
+                      #acl Safe_ports port 70          # gopher
+                      #acl Safe_ports port 210         # wais
+                      #acl Safe_ports port 1025-65535  # unregistered ports
+                      #acl Safe_ports port 280         # http-mgmt
+                      #acl Safe_ports port 488         # gss-http
+                      #acl Safe_ports port 591         # filemaker
+                      #acl Safe_ports port 777         # multiling http
+                      acl CONNECT method CONNECT
+                      #http_access deny !Safe_ports
+                      http_access deny CONNECT !SSL_ports
+                      #http_access allow localhost manager
+                      #http_access deny manager
+                      http_access allow localnet
+                      #http_access allow localhost
+                      http_access allow all
+                      #http_access deny all
+                      http_port 3128
+                      coredump_dir /var/spool/squid
+                      refresh_pattern ^ftp:           1440    20%     10080
+                      refresh_pattern ^gopher:        1440    0%      1440
+                      refresh_pattern -i (/cgi-bin/|\?) 0     0%      0
+                      refresh_pattern (Release|Packages(.gz)*)$      0       20%     2880
+                      refresh_pattern .               0       20%     4320
