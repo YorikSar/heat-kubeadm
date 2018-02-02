@@ -89,19 +89,11 @@ resources:
             cloud_config:
                 #cloud-config
                 manage_etc_hosts: localhost
-                #package_upgrade: true
-                packages:
-                - kubeadm=1.8.7-00
-                - kubernetes-cni=0.5.1-00
-                - kubelet=1.8.7-00
-                - kubectl=1.8.7-00
+                package_update: true
                 apt_sources:
                     docker.list:
                         source: "deb [arch=amd64] https://apt.dockerproject.org/repo ubuntu-xenial main"
                         key: { get_file: docker.pgp }
-                    kubernetes.list:
-                        source: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
-                        key: { get_file: kubernetes.pgp }
                 runcmd:
                     - - 'systemd-run'
                       - '--on-boot=0s'
