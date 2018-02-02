@@ -116,7 +116,7 @@ resources:
                 if:
                     - empty_proxy
                     - {}
-                    - apt_proxy: { get_attr: proxy }
+                    - apt_proxy: { get_param: proxy }
     ##### Master #####
     master_floatingip:
         type: OS::Neutron::FloatingIP
@@ -136,8 +136,8 @@ resources:
         type: OS::Heat::MultipartMime
         properties:
             parts:
-                - { get_resource: proxy_config }
-                - { get_resource: master_config_files }
+                - config: { get_resource: proxy_config }
+                - config: { get_resource: master_config_files }
     master:
         type: node.yaml
         depends_on: internal_subnet
