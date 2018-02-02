@@ -42,10 +42,20 @@ parameters:
         label: Additional Config
         description: Additional software config
         default: ""
+    proxy:
+        type: string
+        label: Proxy
+        description: Proxy server to use, in format http://1.2.3.4:567
+        default: ""
+
 conditions:
     empty_additional_config:
         equals:
             - { get_param: additional_config }
+            - ""
+    empty_proxy:
+        equals:
+            - { get_param: proxy }
             - ""
 resources:
     port:
@@ -100,6 +110,14 @@ resources:
                       - 'bash'
                       - '-c'
                       - { get_param: install_script }
+    user_data_proxy:
+        type: OS::Heat::CloudConfig
+        properties:
+            cloud_config:
+                if:
+                    - empty_proxy
+                    - {}
+                    - apt_proxy: { get_param: proxy }
     user_data:
         type: OS::Heat::MultipartMime
         properties:
@@ -107,7 +125,9 @@ resources:
                 if: 
                     - empty_additional_config
                     - - config: { get_resource: user_data_base }
+                      - config: { get_resource: user_data_proxy }
                     - - config: { get_resource: user_data_base }
+                      - config: { get_resource: user_data_proxy }
                       - config: { get_param: additional_config }
 outputs:
     ip_address:
