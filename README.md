@@ -65,52 +65,46 @@ name or ID of image to use for nodes in `image` and availability zone for
 VMs in `availability_zone`.
 
 All other options and their descriptions can be found at the top of
-`stack.yaml` file.
+`stack_full.yaml` file.
+
+Note that if you would like to deploy stack in existing network, you can
+specify `internal_net` parameter in environment file and then use template
+`stack.yaml`.
 
 ### Create Heat stack
+
 
 To create Heat stack, issue command:
 
 ```bash
-$ openstack stack create -t stack.yaml -e env.yaml teststack --wait                                                                                        ~/src/github.com/YorikSar/heat-kubeadm
+$ openstack stack create -t stack_full.yaml -e env.yaml teststack --wait                                                                                        ~/src/github.com/YorikSar/heat-kubeadm
 ```
 
 If you do specify `--wait` flag, output should look like this:
 ```
-2018-02-02 13:36:43Z [teststack]: CREATE_IN_PROGRESS  Stack CREATE started
-2018-02-02 13:36:44Z [teststack.token_part_2]: CREATE_IN_PROGRESS  state changed
-2018-02-02 13:36:44Z [teststack.token_part_2]: CREATE_COMPLETE  state changed
-2018-02-02 13:36:45Z [teststack.random_string]: CREATE_IN_PROGRESS  state changed
-2018-02-02 13:36:45Z [teststack.random_string]: CREATE_COMPLETE  state changed
-2018-02-02 13:36:45Z [teststack.internal_net]: CREATE_IN_PROGRESS  state changed
-2018-02-02 13:36:46Z [teststack.internal_net]: CREATE_COMPLETE  state changed
-2018-02-02 13:36:46Z [teststack.internal_router]: CREATE_IN_PROGRESS  state changed
-2018-02-02 13:36:46Z [teststack.master_config]: CREATE_IN_PROGRESS  state changed
-2018-02-02 13:36:46Z [teststack.master_config]: CREATE_COMPLETE  state changed
-2018-02-02 13:36:46Z [teststack.internal_subnet]: CREATE_IN_PROGRESS  state changed
-2018-02-02 13:36:46Z [teststack.internal_router]: CREATE_COMPLETE  state changed
-2018-02-02 13:36:46Z [teststack.master_floatingip]: ADOPT_IN_PROGRESS  state changed
-2018-02-02 13:36:46Z [teststack.master_floatingip]: ADOPT_COMPLETE  state changed
-2018-02-02 13:36:46Z [teststack.master_floatingip]: CHECK_COMPLETE  CHECK not supported for OS::Neutron::FloatingIP
-2018-02-02 13:36:46Z [teststack.internal_subnet]: CREATE_COMPLETE  state changed
-2018-02-02 13:36:47Z [teststack.token_part_1]: CREATE_IN_PROGRESS  state changed
-2018-02-02 13:36:47Z [teststack.token_part_1]: CREATE_COMPLETE  state changed
-2018-02-02 13:36:47Z [teststack.internal_router_interface]: CREATE_IN_PROGRESS  state changed
-2018-02-02 13:36:47Z [teststack.token]: CREATE_IN_PROGRESS  state changed
-2018-02-02 13:36:47Z [teststack.token]: CREATE_COMPLETE  state changed
-2018-02-02 13:36:47Z [teststack.internal_router_interface]: CREATE_COMPLETE  state changed
-2018-02-02 13:36:48Z [teststack.master]: CREATE_IN_PROGRESS  state changed
-2018-02-02 13:36:58Z [teststack.master]: CREATE_COMPLETE  state changed
-2018-02-02 13:36:59Z [teststack.slaves]: CREATE_IN_PROGRESS  state changed
-2018-02-02 13:37:14Z [teststack.slaves]: CREATE_COMPLETE  state changed
-2018-02-02 13:37:14Z [teststack]: CREATE_COMPLETE  Stack CREATE completed successfully
+2018-02-02 19:01:57Z [teststack]: CREATE_IN_PROGRESS  Stack CREATE started
+2018-02-02 19:01:57Z [teststack.random_string]: CREATE_IN_PROGRESS  state changed
+2018-02-02 19:01:58Z [teststack.random_string]: CREATE_COMPLETE  state changed
+2018-02-02 19:01:58Z [teststack.prefix_random]: CREATE_IN_PROGRESS  state changed
+2018-02-02 19:01:58Z [teststack.prefix_random]: CREATE_COMPLETE  state changed
+2018-02-02 19:01:58Z [teststack.internal_net]: CREATE_IN_PROGRESS  state changed
+2018-02-02 19:01:58Z [teststack.internal_net]: CREATE_COMPLETE  state changed
+2018-02-02 19:01:59Z [teststack.internal_router]: CREATE_IN_PROGRESS  state changed
+2018-02-02 19:01:59Z [teststack.internal_subnet]: CREATE_IN_PROGRESS  state changed
+2018-02-02 19:01:59Z [teststack.internal_router]: CREATE_COMPLETE  state changed
+2018-02-02 19:01:59Z [teststack.internal_subnet]: CREATE_COMPLETE  state changed
+2018-02-02 19:01:59Z [teststack.stack]: CREATE_IN_PROGRESS  state changed
+2018-02-02 19:02:00Z [teststack.internal_router_interface]: CREATE_IN_PROGRESS  state changed
+2018-02-02 19:02:00Z [teststack.internal_router_interface]: CREATE_COMPLETE  state changed
+2018-02-02 19:02:35Z [teststack.stack]: CREATE_COMPLETE  state changed
+2018-02-02 19:02:35Z [teststack]: CREATE_COMPLETE  Stack CREATE completed successfully
 +---------------------+----------------------------------------+
 | Field               | Value                                  |
 +---------------------+----------------------------------------+
-| id                  | de74c522-57c7-40ab-8111-0deb7ad1d7e2   |
+| id                  | 5957e776-d630-4072-bdbb-df69303b5d9f   |
 | stack_name          | teststack                              |
 | description         | Deploy Kubernetes cluster with kubeadm |
-| creation_time       | 2018-02-02T13:36:43Z                   |
+| creation_time       | 2018-02-02T19:01:57Z                   |
 | updated_time        | None                                   |
 | stack_status        | CREATE_COMPLETE                        |
 | stack_status_reason | Stack CREATE completed successfully    |
