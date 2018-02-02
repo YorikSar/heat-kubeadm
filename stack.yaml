@@ -6,7 +6,6 @@ parameters:
         type: string
         label: Key Name
         description: SSH key to be used for all instances
-        default: ytl
     image:
         type: string
         label: Image
@@ -21,7 +20,6 @@ parameters:
         type: string
         label: Master Floating IP ID
         description: Floating IP for master node
-        default: 24776f99-7599-4bdd-8a1a-1a551180eb4a
     slave_count:
         type: number
         label: Slave Count
@@ -36,7 +34,6 @@ parameters:
         type: comma_delimited_list
         label: Slave Floating IP IDs
         description: Floating IP for master node
-        default: 851660f0-3648-4560-9403-c68647e4aa99,32cc96ef-8590-4785-b660-c6e773c97f3d,6c9d42cb-ad7e-46dd-aca8-9a5cc628e5de
     public_network_id:
         type: string
         description: ID of the public network
@@ -54,7 +51,6 @@ parameters:
         type: string
         label: Availability Zone
         description: Availabilito zone to create nodes in
-        default: mcp-platform
 
 resources:
     random_string:
