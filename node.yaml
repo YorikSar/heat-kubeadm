@@ -63,9 +63,6 @@ resources:
         properties:
             admin_state_up: true
             network_id: { get_param: internal_net }
-            allowed_address_pairs:
-                - ip_address: 10.96.0.0/8
-                - ip_address: 192.168.0.0/16
     floatingip_association:
         type: OS::Neutron::FloatingIPAssociation
         properties:
@@ -90,6 +87,8 @@ resources:
                 #cloud-config
                 manage_etc_hosts: localhost
                 package_update: true
+                packages:
+                    - socat
                 apt_sources:
                     docker.list:
                         source: "deb [arch=amd64] https://apt.dockerproject.org/repo ubuntu-xenial main"
