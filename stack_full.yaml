@@ -1,0 +1,129 @@
+heat_template_version: 2017-02-24
+description: Deploy Kubernetes cluster with kubeadm
+
+parameters:
+    key_name:
+        type: string
+        label: Key Name
+        description: SSH key to be used for all instances
+    image:
+        type: string
+        label: Image
+        description: Image to be used
+        default: ubuntu-16-04-amd64-cloudimg    
+    master_flavor:
+        type: string
+        label: Master Instance Type
+        description: Type of instance (flavor) to deploy master node
+        default: m1.small
+    master_floating_ip:
+        type: string
+        label: Master Floating IP ID
+        description: Floating IP for master node
+    slave_count:
+        type: number
+        label: Slave Count
+        description: Number of slaves
+        default: 3
+    slave_flavor:
+        type: string
+        label: Slave Instance Type
+        description: Type of instance (flavor) to deploy slave nodes
+        default: m1.small
+    slave_floating_ips:
+        type: comma_delimited_list
+        label: Slave Floating IP IDs
+        description: Floating IP for master node
+    public_network_id:
+        type: string
+        description: ID of the public network
+        default: public
+    resource_prefix:
+        type: string
+        description: Prefix to add to all resources
+        default: k8s-
+    dns_nameservers:
+        type: comma_delimited_list
+        label: DNS Nameservers
+        description: DNS nameservers to use on nodes
+        default: 8.8.8.8
+    availability_zone:
+        type: string
+        label: Availability Zone
+        description: Availabilito zone to create nodes in
+    proxy:
+        type: string
+        label: Proxy
+        description: Proxy server to use, in format http://1.2.3.4:567
+        default: ""
+resources:
+    random_string:
+        type: OS::Heat::RandomString
+        properties:
+            length: 8
+            sequence: lowercase
+    prefix_random:
+        type: OS::Heat::Value
+        properties:
+            value:
+                str_replace:
+                    template: $prefix$random
+                    params:
+                        $prefix: { get_param: resource_prefix }
+                        $random: { get_resource: random_string }
+    ##### Network #####
+    internal_net:
+        type: OS::Neutron::Net
+        properties:
+            admin_state_up: true
+            name:
+                str_replace:
+                    template: $prefix-network
+                    params:
+                        $prefix: { get_resource: prefix_random }
+    internal_subnet:
+        type: OS::Neutron::Subnet
+        properties:
+            network_id: { get_resource: internal_net }
+            cidr: 10.2.2.0/24
+            gateway_ip: 10.2.2.1
+            enable_dhcp: true
+            dns_nameservers: { get_param: dns_nameservers }
+            name:
+                str_replace:
+                    template: $prefix-subnet
+                    params:
+                        $prefix: { get_resource: prefix_random }
+    internal_router:
+        type: OS::Neutron::Router
+        properties:
+            admin_state_up: true
+            external_gateway_info: { "network": { get_param: public_network_id }}
+            name:
+                str_replace:
+                    template: $prefix-router
+                    params:
+                        $prefix: { get_resource: prefix_random }
+    internal_router_interface:
+        type: OS::Neutron::RouterInterface
+        properties:
+            router_id: { get_resource: internal_router }
+            subnet_id: { get_resource: internal_subnet }
+    ##### Stack #####
+    stack:
+        type: stack.yaml
+        depends_on: internal_subnet
+        properties:
+            key_name: { get_param: key_name }
+            image: { get_param: image }
+            master_flavor: { get_param: master_flavor }
+            master_floating_ip: { get_param: master_floating_ip }
+            slave_count: { get_param: slave_count }
+            slave_flavor: { get_param: slave_flavor }
+            slave_floating_ips: { get_param: slave_floating_ips }
+            public_network_id: { get_param: public_network_id }
+            internal_net: { get_resource: internal_net }
+            resource_prefix: { get_attr: [prefix_random, value] }
+            dns_nameservers: { get_param: dns_nameservers }
+            availability_zone: { get_param: availability_zone }
+            proxy: { get_param: proxy }

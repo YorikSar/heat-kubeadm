@@ -38,6 +38,10 @@ parameters:
         type: string
         description: ID of the public network
         default: public
+    internal_net:
+        type: string
+        description: ID of the internal network
+        default: public
     resource_prefix:
         type: string
         description: Prefix to add to all resources
@@ -63,47 +67,6 @@ resources:
         properties:
             length: 8
             sequence: lowercase
-    ##### Network #####
-    internal_net:
-        type: OS::Neutron::Net
-        properties:
-            admin_state_up: true
-            name:
-                str_replace:
-                    template: $prefix$random-network
-                    params:
-                        $prefix: { get_param: resource_prefix }
-                        $random: { get_resource: random_string }
-    internal_subnet:
-        type: OS::Neutron::Subnet
-        properties:
-            network_id: { get_resource: internal_net }
-            cidr: 10.2.2.0/24
-            gateway_ip: 10.2.2.1
-            enable_dhcp: true
-            dns_nameservers: { get_param: dns_nameservers }
-            name:
-                str_replace:
-                    template: $prefix$random-subnet
-                    params:
-                        $prefix: { get_param: resource_prefix }
-                        $random: { get_resource: random_string }
-    internal_router:
-        type: OS::Neutron::Router
-        properties:
-            admin_state_up: true
-            external_gateway_info: { "network": { get_param: public_network_id }}
-            name:
-                str_replace:
-                    template: $prefix$random-router
-                    params:
-                        $prefix: { get_param: resource_prefix }
-                        $random: { get_resource: random_string }
-    internal_router_interface:
-        type: OS::Neutron::RouterInterface
-        properties:
-            router_id: { get_resource: internal_router }
-            subnet_id: { get_resource: internal_subnet }
     ##### Master #####
     master_floatingip:
         type: OS::Neutron::FloatingIP
@@ -121,7 +84,6 @@ resources:
                       content: { get_file: tiller.yaml }
     master:
         type: node.yaml
-        depends_on: internal_subnet
         properties:
             index: 0
             key_name: { get_param: key_name }
@@ -136,7 +98,7 @@ resources:
                     params:
                         $prefix: { get_param: resource_prefix }
                         $random: { get_resource: random_string }
-            internal_net: { get_resource: internal_net }
+            internal_net: { get_param: internal_net }
             proxy: { get_param: proxy }
             install_script:
                 str_replace:
@@ -149,7 +111,6 @@ resources:
     ##### Slaves #####
     slaves:
         type: OS::Heat::ResourceGroup
-        depends_on: internal_subnet
         properties:
             count: { get_param: slave_count }
             resource_def:
@@ -167,7 +128,7 @@ resources:
                             params:
                                 $prefix: { get_param: resource_prefix }
                                 $random: { get_resource: random_string }
-                    internal_net: { get_resource: internal_net }
+                    internal_net: { get_param: internal_net }
                     proxy: { get_param: proxy }
                     install_script:
                         str_replace:
