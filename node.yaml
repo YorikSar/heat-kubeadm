@@ -95,10 +95,9 @@ resources:
                 - kubernetes-cni=0.5.1-00
                 - kubelet=1.8.7-00
                 - kubectl=1.8.7-00
-                #- docker-ce=17.03.2~ce-0~ubuntu-xenial
                 apt_sources:
                     docker.list:
-                        source: "deb https://download.docker.com/linux/ubuntu xenial stable"
+                        source: "deb [arch=amd64] https://apt.dockerproject.org/repo ubuntu-xenial main"
                         key: { get_file: docker.pgp }
                     kubernetes.list:
                         source: "deb http://apt.kubernetes.io/ kubernetes-xenial main"

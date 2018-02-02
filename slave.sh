@@ -14,7 +14,7 @@ EOF
 fi
 systemctl daemon-reload
 # Install docker
-apt-get install -y docker-ce=17.03.2~ce-0~ubuntu-xenial
+apt-get install -y docker-engine=17.05.0~ce-0~ubuntu-xenial
 # Configure kubelet to use pause image from Docker Hub
 cat > /etc/systemd/system/kubelet.service.d/20-pod-infra-image.conf <<EOF
 [Service]
