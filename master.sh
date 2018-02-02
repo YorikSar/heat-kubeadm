@@ -31,6 +31,7 @@ apiServerCertSANs:
 imageRepository: mirantisworkloads
 token: $token
 unifiedControlPlaneImage: mirantisworkloads/hyperkube-amd64:v1.8.7
+kubernetesVersion: v1.8.7
 EOF
 modprobe br_netfilter
 kubeadm init --config /root/kubeadm.yaml
