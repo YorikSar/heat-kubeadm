@@ -171,4 +171,4 @@ $ kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" servic
 ```
 
 Now you can use it with one of your floating IPs to see Spinnaker UI in your
-browser: `http://172.17.50.93:31860`
+browser like this: `http://172.17.50.93:31860`
