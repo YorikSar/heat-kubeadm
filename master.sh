@@ -46,3 +46,4 @@ until kubectl get nodes; do
 done
 kubectl apply -f /root/calico.yaml
 kubectl apply -f /root/tiller.yaml
+docker run --rm mirantisworkloads/kube-binaries:v1.8.7 cat /helm.tar.bz2 | sudo -iu ubuntu tar xvjf -
