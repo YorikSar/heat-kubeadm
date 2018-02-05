@@ -104,6 +104,17 @@ resources:
                                   if:
                                       - empty_proxy
                                       - |
+                                        providers:
+                                          docker:
+                                            # Configure your Docker registries here
+                                            accounts:
+                                            - name: dockerhub
+                                              address: https://index.docker.io
+                                              repositories:
+                                                - library/alpine
+                                                - library/ubuntu
+                                                - library/centos
+                                                - library/nginx
                                         jenkins:
                                           Master:
                                             NeverDownloadPlugins: true
@@ -112,6 +123,17 @@ resources:
                                         rbac:
                                           enabled: true
                                       - |
+                                        providers:
+                                          docker:
+                                            # Configure your Docker registries here
+                                            accounts:
+                                            - name: dockerhub
+                                              address: https://index.docker.io
+                                              repositories:
+                                                - library/alpine
+                                                - library/ubuntu
+                                                - library/centos
+                                                - library/nginx
                                         jenkins:
                                           Master:
                                             NeverDownloadPlugins: true
