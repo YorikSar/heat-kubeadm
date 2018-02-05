@@ -51,16 +51,21 @@ parameters:
         type: string
         label: Availability Zone
         description: Availabilito zone to create nodes in
-    proxy:
+    proxy_host:
         type: string
-        label: Proxy
-        description: Proxy server to use, in format http://1.2.3.4:567
+        label: Proxy Host
+        description: Proxy host to use
         default: ""
+    proxy_port:
+        type: number
+        label: Proxy Port
+        description: Proxy port to use
+        default: 0
 
 conditions:
     deploy_proxy:
         equals:
-            - { get_param: proxy }
+            - { get_param: proxy_host }
             - "deploy"
 
 resources:
@@ -158,14 +163,16 @@ resources:
             dns_nameservers: { get_param: dns_nameservers }
             availability_zone: { get_param: availability_zone }
             security_group: { get_resource: security_group }
-            proxy:
+            proxy_host:
                 if:
                     - deploy_proxy
-                    - str_replace:
-                          template: http://$ip:3128
-                          params:
-                              $ip: { get_attr: [proxy_node, ip_address] }
-                    - { get_param: proxy }
+                    - { get_attr: [proxy_node, ip_address] }
+                    - { get_param: proxy_host }
+            proxy_port:
+                if:
+                    - deploy_proxy
+                    - 3128
+                    - { get_param: proxy_port }
     proxy_node:
         type: proxy.yaml
         depends_on: internal_subnet

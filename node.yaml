@@ -46,11 +46,16 @@ parameters:
         type: string
         label: Security Group
         description: Security group to apply to nodes
-    proxy:
+    proxy_host:
         type: string
-        label: Proxy
-        description: Proxy server to use, in format http://1.2.3.4:567
+        label: Proxy Host
+        description: Proxy host to use
         default: ""
+    proxy_port:
+        type: number
+        label: Proxy Port
+        description: Proxy port to use
+        default: 0
 
 conditions:
     empty_additional_config:
@@ -59,7 +64,7 @@ conditions:
             - ""
     empty_proxy:
         equals:
-            - { get_param: proxy }
+            - { get_param: proxy_host }
             - ""
 resources:
     port:
@@ -113,7 +118,12 @@ resources:
                 if:
                     - empty_proxy
                     - {}
-                    - apt_proxy: { get_param: proxy }
+                    - apt_proxy:
+                        str_replace:
+                          template: http://$ip:$port
+                          params:
+                              $ip: { get_param: proxy_host }
+                              $port: { get_param: proxy_port }
     user_data:
         type: OS::Heat::MultipartMime
         properties:

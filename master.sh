@@ -6,10 +6,11 @@ cat << EOF > /etc/systemd/system/docker.service.d/noiptables.conf
 ExecStart=
 ExecStart=/usr/bin/docker daemon -H fd:// --iptables=false
 EOF
-if [ "$proxy" ]; then
+if [ "$proxy_host" ]; then
   cat << EOF > /etc/systemd/system/docker.service.d/proxy.conf
 [Service]
-Environment="HTTP_PROXY=$proxy"
+Environment="HTTP_PROXY=http://$proxy_host:$proxy_port"
+Environment="HTTPS_PROXY=http://$proxy_host:$proxy_port"
 EOF
 fi
 systemctl daemon-reload
