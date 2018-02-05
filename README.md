@@ -160,7 +160,7 @@ Tiller (Helm server component) is already installed on the cluster, and client
 is configured. Now you can install Spinnaker from Helm chart:
 
 ```bash
-$ helm install --set jenkins.Master.NeverDownloadPlugins=true,rbac.enabled=true --name spinnaker spinnaker-3.0.1.tgz --wait
+$ helm install -f spinnaker.yaml --name spinnaker spinnaker-3.1.0.tgz --wait
 ```
 
 It will run for some time and then output information about created release
