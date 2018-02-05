@@ -70,6 +70,12 @@ parameters:
         description: Proxy port to use
         default: 0
 
+conditions:
+    empty_proxy:
+        equals:
+            - { get_param: proxy_host }
+            - ""
+
 resources:
     random_string:
         type: OS::Heat::RandomString
@@ -91,6 +97,41 @@ resources:
                       content: { get_file: calico.yaml }
                     - path: /root/tiller.yaml
                       content: { get_file: tiller.yaml }
+                    - path: /root/spinnaker.yaml
+                      content:
+                          str_replace:
+                              template:
+                                  if:
+                                      - empty_proxy
+                                      - |
+                                        jenkins:
+                                          Master:
+                                            NeverDownloadPlugins: true
+                                            rbac:
+                                              enabled: true
+                                        rbac:
+                                          enabled: true
+                                      - |
+                                        jenkins:
+                                          Master:
+                                            NeverDownloadPlugins: true
+                                            rbac:
+                                              enabled: true
+                                        rbac:
+                                          enabled: true
+                                        clouddriver:
+                                          proxy:
+                                            http:
+                                              enabled: true
+                                              host: "$proxy_host"
+                                              port: $proxy_port
+                                            https:
+                                              enabled: true
+                                              host: "$proxy_host"
+                                              port: $proxy_port
+                              params:
+                                $proxy_host: { get_param: proxy_host }
+                                $proxy_port: { get_param: proxy_port }
     master:
         type: node.yaml
         properties:
