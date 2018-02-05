@@ -18,7 +18,6 @@ Basic steps are:
 1. Prepare template config
 1. Create stack
 1. Wait for it to finish
-1. Configure kubectl
 1. Install Spinnaker with Helm
 
 ### Floating IPs
@@ -140,27 +139,9 @@ Feb 02 13:38:25 k8s-qyyenxoh-master bash[3612]: deployment "tiller-deploy" creat
 Feb 02 13:38:25 k8s-qyyenxoh-master bash[3612]: service "tiller-deploy" created
 ```
 
-Press Ctrl-C to exit the command.
-
-### Configure kubectl
-
-First fetch config from master node:
+Now you can verify that kubernetes is up:
 
 ```bash
-$ scp ubuntu@172.17.50.93:.kube/config kubeconfig
-```
-
-Then you need to replace IP address in the config from internal IP to floating
-IP:
-
-```bash
-$ sed -i 's#https://.*:#https://172.17.50.93:#' kubeconfig
-```
-
-Now you can verify that config is working:
-
-```bash
-$ export KUBECONFIG=kubeconfig
 $ kubectl get nodes
 NAME                   STATUS    AGE       VERSION
 k8s-qyyenxoh-master    Ready     17m       v1.8.7
@@ -175,35 +156,11 @@ untill you see all nodes in Ready state.
 
 ### Install Spinnaker with Helm
 
-Tiller (Helm server component) is already installed on the cluster, so you need
-to initialize only client side:
+Tiller (Helm server component) is already installed on the cluster, and client
+is configured. Now you can install Spinnaker from Helm chart:
 
 ```bash
-$ helm init --client-only
-Creating /home/ubuntu/.helm
-Creating /home/ubuntu/.helm/repository
-Creating /home/ubuntu/.helm/repository/cache
-Creating /home/ubuntu/.helm/repository/local
-Creating /home/ubuntu/.helm/plugins
-Creating /home/ubuntu/.helm/starters
-Creating /home/ubuntu/.helm/cache/archive
-Creating /home/ubuntu/.helm/repository/repositories.yaml
-$HELM_HOME has been configured at /home/ubuntu/.helm.
-Not installing Tiller due to 'client-only' flag having been set
-Happy Helming!
-```
-
-Then you need to add Mirantis chart repository:
-
-```bash
-$ helm repo add mirantisworkloads https://mirantisworkloads.storage.googleapis.com/
-"mirantisworkloads" has been added to your repositories
-```
-
-Now you can install Spinnaker from Helm chart:
-
-```bash
-$ helm install --set jenkins.Master.NeverDownloadPlugins=true,rbac.enabled=true --name spinnaker mirantisworkloads/spinnaker --wait
+$ helm install --set jenkins.Master.NeverDownloadPlugins=true,rbac.enabled=true --name spinnaker spinnaker-3.0.1.tgz --wait
 ```
 
 It will run for some time and then output information about created release
