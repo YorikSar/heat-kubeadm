@@ -87,7 +87,7 @@ resources:
                 str_replace:
                     template: $prefix-network
                     params:
-                        $prefix: { get_resource: prefix_random }
+                        $prefix: { get_attr: [prefix_random, value] }
     internal_subnet:
         type: OS::Neutron::Subnet
         properties:
@@ -100,7 +100,7 @@ resources:
                 str_replace:
                     template: $prefix-subnet
                     params:
-                        $prefix: { get_resource: prefix_random }
+                        $prefix: { get_attr: [prefix_random, value] }
     internal_router:
         type: OS::Neutron::Router
         properties:
@@ -110,7 +110,7 @@ resources:
                 str_replace:
                     template: $prefix-router
                     params:
-                        $prefix: { get_resource: prefix_random }
+                        $prefix: { get_attr: [prefix_random, value] }
     internal_router_interface:
         type: OS::Neutron::RouterInterface
         properties:
