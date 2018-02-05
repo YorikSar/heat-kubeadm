@@ -132,11 +132,9 @@ This command will output lines from log of kubernetes installation. Last lines
 are expected to be like these:
 
 ```
-Feb 02 13:38:25 k8s-qyyenxoh-master bash[3612]: + kubectl apply -f /root/tiller.yaml
-Feb 02 13:38:25 k8s-qyyenxoh-master bash[3612]: serviceaccount "tiller" created
-Feb 02 13:38:25 k8s-qyyenxoh-master bash[3612]: clusterrolebinding "tiller" created
-Feb 02 13:38:25 k8s-qyyenxoh-master bash[3612]: deployment "tiller-deploy" created
-Feb 02 13:38:25 k8s-qyyenxoh-master bash[3612]: service "tiller-deploy" created
+Feb 05 20:32:41 k8s-xnpetidzawduzisz-master sudo[5850]: pam_unix(sudo:session): session closed for user ubuntu
+Feb 05 20:32:41 k8s-xnpetidzawduzisz-master bash[3199]: + cp /root/spinnaker.yaml /home/ubuntu/spinnaker.yaml
+Feb 05 20:32:41 k8s-xnpetidzawduzisz-master bash[3199]: + chown ubuntu:ubuntu /home/ubuntu/spinnaker.yaml
 ```
 
 Now you can verify that kubernetes is up:
