@@ -116,6 +116,30 @@ resources:
         properties:
             router_id: { get_resource: internal_router }
             subnet_id: { get_resource: internal_subnet }
+    security_group:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name:
+                str_replace:
+                    template: $prefix-security-group
+                    params:
+                        $prefix: { get_attr: [prefix_random, value] }
+            rules:
+                - remote_mode: remote_group_id
+                  direction: ingress
+                - remote_mode: remote_group_id
+                  direction: egress
+                - direction: egress
+                - protocol: icmp
+                - port_range_min: 22
+                  port_range_max: 22
+                  protocol: tcp
+                - port_range_min: 6443
+                  port_range_max: 6443
+                  protocol: tcp
+                - port_range_min: 30000
+                  port_range_max: 32767
+                  protocol: tcp
     ##### Stack #####
     stack:
         type: stack.yaml
@@ -133,6 +157,7 @@ resources:
             resource_prefix: { get_attr: [prefix_random, value] }
             dns_nameservers: { get_param: dns_nameservers }
             availability_zone: { get_param: availability_zone }
+            security_group: { get_resource: security_group }
             proxy:
                 if:
                     - deploy_proxy
@@ -153,3 +178,4 @@ resources:
             internal_net: { get_resource: internal_net }
             resource_prefix: { get_attr: [prefix_random, value] }
             availability_zone: { get_param: availability_zone }
+            security_group: { get_resource: security_group }

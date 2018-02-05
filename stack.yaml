@@ -55,6 +55,10 @@ parameters:
         type: string
         label: Availability Zone
         description: Availabilito zone to create nodes in
+    security_group:
+        type: string
+        label: Security Group
+        description: Security group to apply to nodes
     proxy:
         type: string
         label: Proxy
@@ -100,6 +104,7 @@ resources:
                         $random: { get_resource: random_string }
             internal_net: { get_param: internal_net }
             proxy: { get_param: proxy }
+            security_group: { get_param: security_group }
             install_script:
                 str_replace:
                     params:
@@ -130,6 +135,7 @@ resources:
                                 $random: { get_resource: random_string }
                     internal_net: { get_param: internal_net }
                     proxy: { get_param: proxy }
+                    security_group: { get_param: security_group }
                     install_script:
                         str_replace:
                             params:

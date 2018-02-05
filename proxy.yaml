@@ -31,6 +31,10 @@ parameters:
         type: string
         label: Availability Zone
         description: Availabilito zone to create nodes in
+    security_group:
+        type: string
+        label: Security Group
+        description: Security group to apply to nodes
 outputs:
     ip_address:
         description: IP address of the proxy
@@ -41,6 +45,8 @@ resources:
         properties:
             admin_state_up: true
             network_id: { get_param: internal_net }
+            security_groups:
+                - { get_param: security_group }
     proxy_floatingip:
         type: OS::Neutron::FloatingIP
         properties:
