@@ -23,10 +23,13 @@ RUN set -x && \
 RUN set -x && \
   cd /root && \
   /tmp/usr/local/bin/helm init --client-only && \
-  /tmp/usr/local/bin/helm repo add mirantisworkloads https://mirantisworkloads.storage.googleapis.com/ && \
-  /tmp/usr/local/bin/helm fetch mirantisworkloads/spinnaker && \
+  /tmp/usr/local/bin/helm repo add mirantisworkloads https://mirantisworkloads.storage.googleapis.com/
+
+COPY spinnaker-3.1.0.tgz /root/
+
+RUN set -x && \
+  cd /root && \
   tar cjf helm.tar.bz2 .helm spinnaker-*.tgz
-  
 
 FROM busybox
 COPY --from=builder /package.cpio.bz2 /package.cpio.bz2
