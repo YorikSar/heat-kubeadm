@@ -63,6 +63,13 @@ You must also specify name of your SSH key in OpenStack in `key_name`,
 name or ID of image to use for nodes in `image` and availability zone for
 VMs in `availability_zone`.
 
+If you need to use proxy with your environment, you can add these options:
+
+```yaml
+    proxy_host: myproxy.local
+    proxy_port: 8080
+```
+
 All other options and their descriptions can be found at the top of
 `stack_full.yaml` file.
 
