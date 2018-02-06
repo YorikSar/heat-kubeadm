@@ -179,3 +179,9 @@ $ kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" servic
 
 Now you can use it with one of your floating IPs to see Spinnaker UI in your
 browser like this: `http://172.17.50.93:31860`
+
+Jenkins deployed together with Spinnaker could be accessed using NodePort as well:
+```bash
+$ kubectl get --namespace spinnaker -o jsonpath="{.spec.ports[0].nodePort}" services jenkins-spinnaker
+30991
+```
